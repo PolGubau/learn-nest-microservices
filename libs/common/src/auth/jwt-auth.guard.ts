@@ -1,12 +1,12 @@
 import {
-  type CanActivate,
-  type ExecutionContext,
+  CanActivate,
+  ExecutionContext,
   Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import type { ClientProxy } from '@nestjs/microservices';
-import { catchError, type Observable, tap } from 'rxjs';
+import { ClientProxy } from '@nestjs/microservices';
+import { catchError, Observable, tap } from 'rxjs';
 import { AUTH_SERVICE } from './services';
 
 @Injectable()

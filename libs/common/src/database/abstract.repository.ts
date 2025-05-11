@@ -1,13 +1,13 @@
-import { type Logger, NotFoundException } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import {
-  type FilterQuery,
-  type Model,
+  FilterQuery,
+  Model,
   Types,
-  type UpdateQuery,
-  type SaveOptions,
-  type Connection,
+  UpdateQuery,
+  SaveOptions,
+  Connection,
 } from 'mongoose';
-import type { AbstractDocument } from './abstract.schema';
+import { AbstractDocument } from './abstract.schema';
 
 export abstract class AbstractRepository<TDocument extends AbstractDocument> {
   protected abstract readonly logger: Logger;
@@ -38,56 +38,44 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
       throw new NotFoundException('Document not found.');
     }
 
-    return document as TDocument;
+    return document;
   }
 
   async findOneAndUpdate(
     filterQuery: FilterQuery<TDocument>,
     update: UpdateQuery<TDocument>,
-  ): Promise<TDocument> {
+  ) {
     const document = await this.model.findOneAndUpdate(filterQuery, update, {
       lean: true,
       new: true,
     });
 
     if (!document) {
-      this.logger.warn('Document not found with filterQuery:', filterQuery);
+      this.logger.warn(`Document not found with filterQuery:`, filterQuery);
       throw new NotFoundException('Document not found.');
     }
 
-    return document as TDocument;
+    return document;
   }
 
   async upsert(
     filterQuery: FilterQuery<TDocument>,
     document: Partial<TDocument>,
-  ): Promise<TDocument> {
+  ) {
     return this.model.findOneAndUpdate(filterQuery, document, {
       lean: true,
       upsert: true,
       new: true,
-    }) as Promise<TDocument>;
+    });
   }
 
-  async find(filterQuery: FilterQuery<TDocument>): Promise<TDocument[]> {
-    return this.model.find(filterQuery, {}, { lean: true }) as Promise<
-      TDocument[]
-    >;
+  async find(filterQuery: FilterQuery<TDocument>) {
+    return this.model.find(filterQuery, {}, { lean: true });
   }
 
-  async startTransaction(): Promise<any> {
+  async startTransaction() {
     const session = await this.connection.startSession();
     session.startTransaction();
     return session;
-  }
-
-  async commitTransaction(session: any) {
-    await session.commitTransaction();
-    session.endSession();
-  }
-
-  async abortTransaction(session: any) {
-    await session.abortTransaction();
-    session.endSession();
   }
 }
